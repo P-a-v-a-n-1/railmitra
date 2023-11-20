@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "269756755900",
+    "project_id": "railmitra-29557",
+    "storage_bucket": "railmitra-29557.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:269756755900:android:97695f9b05d76752fdc5b9",
+        "android_client_info": {
+          "package_name": "com.example.untitled"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDSERj3gUUO_Er3kBjLocLJsgWK_2hyr4A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
