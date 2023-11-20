@@ -33,6 +33,7 @@ dependencies:
   firebase_core: ^2.22.0
   firebase_auth: ^4.4.0
   url_launcher: ^6.0.9
+  cloud_firestore: ^4.13.1
 
 
 
@@ -75,6 +76,7 @@ flutter:
     - assets/vectors/
     - assets/images/chat.png
     - assets/vectors/chat.svg
+    - assets/gifs/greentick.gif
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

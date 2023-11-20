@@ -6,12 +6,37 @@ class FeedbackPage extends StatefulWidget {
   _FeedbackPageState createState() => _FeedbackPageState();
 }
 
-class _FeedbackPageState extends State<FeedbackPage> {
+class _FeedbackPageState extends State<FeedbackPage> with SingleTickerProviderStateMixin {
   TextEditingController _feedbackController = TextEditingController();
   int _selectedEmotionIndex = -1; // Default: no emoji selected
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
 
   // Define a list of emoji icons representing emotions
   final List<String> _emojiList = ['🙁', '😐', '😐', '😊', '😄'];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 200), // Adjust the duration as needed
+    );
+
+    _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,8 +111,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
                         ),
                       );
                     } else {
-                      // Show the feedback submission dialog
-                      _showFeedbackDialog();
+                      // Show the feedback submission dialog with animation
+                      _showFeedbackDialogWithAnimation();
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -107,14 +132,31 @@ class _FeedbackPageState extends State<FeedbackPage> {
     );
   }
 
-  void _showFeedbackDialog() {
+  void _showFeedbackDialogWithAnimation() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        _animationController.reset();
+        _animationController.forward();
+
         return BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
           child: AlertDialog(
-            title: Text('Thank You!'),
+            title: Row(
+              children: [
+                Text('Thank You!'),
+                SizedBox(width: 10),
+                AnimatedBuilder(
+                  animation: _animationController,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: _scaleAnimation.value,
+                      child: Text('✅', style: TextStyle(fontSize: 24, color: Colors.green)),
+                    );
+                  },
+                ),
+              ],
+            ),
             content: Text('Thank you for your feedback.'),
             actions: [
               TextButton(
