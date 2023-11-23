@@ -21,7 +21,7 @@ class AboutUsPage extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColor,
+                  color: Color(0xFF004080),
                 ),
               ),
               SizedBox(height: 20),
@@ -32,6 +32,7 @@ class AboutUsPage extends StatelessWidget {
               SizedBox(height: 20),
               Text(
                 'What Sets Rail Mitra Apart:',
+                textAlign: TextAlign.justify,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -41,17 +42,20 @@ class AboutUsPage extends StatelessWidget {
               SizedBox(height: 10),
               Text(
                 'Real-Time Updates: Rail Mitra delivers up-to-the-minute information on seat availability based on source, destination, and train number, ensuring you have the latest details for a smooth trip.',
+                textAlign: TextAlign.justify,
                 style: TextStyle(fontSize: 16),
               ),
               SizedBox(height: 10),
               Text(
                 'User-Friendly Interface: Designed with you in mind, Rail Mitra\'s intuitive interface makes navigating through the various features a breeze, giving you quick access to the information you need.',
                 style: TextStyle(fontSize: 16),
+                textAlign: TextAlign.justify,
               ),
               SizedBox(height: 10),
               Text(
                 'Transparent and Reliable: Trust is paramount in travel planning. With Rail Mitra, you can rely on accurate data sourced directly from the railway database. We believe in transparency, providing you with the most reliable information to plan your journey confidently.',
                 style: TextStyle(fontSize: 16),
+                textAlign: TextAlign.justify,
               ),
               SizedBox(height: 20),
               Text(
@@ -66,6 +70,7 @@ class AboutUsPage extends StatelessWidget {
               Text(
                 'Our mission at Rail Mitra is to simplify and enhance your train travel experience. Whether you\'re a seasoned traveler or embarking on your first journey, we\'re here to make the process straightforward, informative, and enjoyable.',
                 style: TextStyle(fontSize: 16),
+                textAlign: TextAlign.justify,
               ),
               SizedBox(height: 20),
               Text(
@@ -82,6 +87,7 @@ class AboutUsPage extends StatelessWidget {
               Text(
                 'Thank you for choosing Rail Mitra. We look forward to being your trusted partner on your travel adventures!',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.justify,
               ),
             ],
           ),
