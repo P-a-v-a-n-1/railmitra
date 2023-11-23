@@ -16,48 +16,48 @@ class _FAQsPageState extends State<FAQsPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            _buildPanel(),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // Set mainAxisSize to min
+            children: [
+              ExpansionPanelList(
+                elevation: 1,
+                expandedHeaderPadding: EdgeInsets.all(0),
+                children: _data.map<ExpansionPanel>((Item item) {
+                  return ExpansionPanel(
+                    headerBuilder: (BuildContext context, bool isExpanded) {
+                      return ListTile(
+                        title: Text(
+                          item.question,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF004080),
+                          ),
+                        ),
+                      );
+                    },
+                    body: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          item.answer,
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    ),
+                    isExpanded: item.isExpanded,
+                  );
+                }).toList(),
+                expansionCallback: (int index, bool isExpanded) {
+                  setState(() {
+                    _data[index].isExpanded = !isExpanded;
+                  });
+                },
+              ),
+            ],
+          ),
         ),
       ),
-    );
-  }
-
-  Widget _buildPanel() {
-    return ExpansionPanelList(
-      elevation: 1,
-      expandedHeaderPadding: EdgeInsets.all(0),
-      children: _data.map<ExpansionPanel>((Item item) {
-        return ExpansionPanel(
-          headerBuilder: (BuildContext context, bool isExpanded) {
-            return ListTile(
-              title: Text(
-                item.question,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF004080), // Set the color here
-                ),
-              ),
-              leading: Icon(
-                isExpanded ? Icons.expand_less : Icons.expand_more,
-                color: Color(0xFF004080), // Set the color here
-              ),
-            );
-          },
-          body: ListTile(
-            title: Text(item.answer),
-          ),
-          isExpanded: item.isExpanded,
-          canTapOnHeader: true,
-        );
-      }).toList(),
-      expansionCallback: (int index, bool isExpanded) {
-        setState(() {
-          _data[index].isExpanded = !isExpanded;
-        });
-      },
     );
   }
 }
@@ -79,16 +79,6 @@ List<Item> generateItems() {
     Item(
       question: 'What happens if the app shows no seat availability for my chosen route or train?',
       answer: 'If there\'s no availability, consider trying alternative dates or trains. Seat availability is dynamic and can change based on demand.',
-    ),
-    // Replace the default placeholder items with your custom question and answer
-    Item(
-      question: 'Your Custom Question',
-      answer: 'Your Custom Answer',
-      isExpanded: true, // Set this to true if you want it to be initially expanded
-    ),
-    Item(
-      question: 'Question 2',
-      answer: 'Answer 2',
     ),
     // Add more items as needed
   ];

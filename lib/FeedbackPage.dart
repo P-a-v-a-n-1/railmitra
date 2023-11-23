@@ -1,42 +1,18 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FeedbackPage extends StatefulWidget {
   @override
   _FeedbackPageState createState() => _FeedbackPageState();
 }
 
-class _FeedbackPageState extends State<FeedbackPage> with SingleTickerProviderStateMixin {
+class _FeedbackPageState extends State<FeedbackPage> {
   TextEditingController _feedbackController = TextEditingController();
   int _selectedEmotionIndex = -1; // Default: no emoji selected
-  late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
 
   // Define a list of emoji icons representing emotions
   final List<String> _emojiList = ['🙁', '😐', '😐', '😊', '😄'];
-
-  @override
-  void initState() {
-    super.initState();
-
-    _animationController = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: 200), // Adjust the duration as needed
-    );
-
-    _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeInOut,
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +47,7 @@ class _FeedbackPageState extends State<FeedbackPage> with SingleTickerProviderSt
                           });
                         },
                         child: AnimatedContainer(
-                          duration: Duration(milliseconds: 300),
+                          duration: Duration(milliseconds: 500),
                           curve: Curves.easeInOut,
                           transform: Matrix4.identity()
                             ..scale((i == _selectedEmotionIndex) ? 1.2 : 1.0),
@@ -102,7 +78,7 @@ class _FeedbackPageState extends State<FeedbackPage> with SingleTickerProviderSt
                 ),
                 SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (_selectedEmotionIndex == -1) {
                       // Show an error message if no emoji is selected
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -111,8 +87,14 @@ class _FeedbackPageState extends State<FeedbackPage> with SingleTickerProviderSt
                         ),
                       );
                     } else {
-                      // Show the feedback submission dialog with animation
-                      _showFeedbackDialogWithAnimation();
+                      // Submit feedback immediately
+                      await FeedbackService().submitFeedback(
+                        _feedbackController.text,
+                        _selectedEmotionIndex,
+                      );
+
+                      // Show the feedback submission dialog
+                      _showFeedbackDialog(context);
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -121,7 +103,8 @@ class _FeedbackPageState extends State<FeedbackPage> with SingleTickerProviderSt
                   ),
                   child: Text(
                     'Submit Feedback',
-                    style: TextStyle(fontSize: 18),
+
+                    style: TextStyle(fontSize: 18,color: Colors.white),
                   ),
                 ),
               ],
@@ -132,37 +115,22 @@ class _FeedbackPageState extends State<FeedbackPage> with SingleTickerProviderSt
     );
   }
 
-  void _showFeedbackDialogWithAnimation() {
+  void _showFeedbackDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        _animationController.reset();
-        _animationController.forward();
-
         return BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
           child: AlertDialog(
-            title: Row(
-              children: [
-                Text('Thank You!'),
-                SizedBox(width: 10),
-                AnimatedBuilder(
-                  animation: _animationController,
-                  builder: (context, child) {
-                    return Transform.scale(
-                      scale: _scaleAnimation.value,
-                      child: Text('✅', style: TextStyle(fontSize: 24, color: Colors.green)),
-                    );
-                  },
-                ),
-              ],
+            title: ListTile(
+              leading: _AnimatedCheckMark(),
+              title: Text('Thank You!'),
             ),
             content: Text('Thank you for your feedback.'),
             actions: [
               TextButton(
                 onPressed: () {
-                  // Reset the page state when the user clicks OK
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(); // Close the dialog
                   _resetPage();
                 },
                 child: Text('OK'),
@@ -176,10 +144,70 @@ class _FeedbackPageState extends State<FeedbackPage> with SingleTickerProviderSt
 
   void _resetPage() {
     // Reset the state of the page
+    print('Resetting page...');
     setState(() {
       _selectedEmotionIndex = -1;
       _feedbackController.clear();
     });
+  }
+}
+
+class FeedbackService {
+  final CollectionReference feedbackCollection =
+  FirebaseFirestore.instance.collection('FeedBack');
+
+  Future<void> submitFeedback(String message, int rating) async {
+    try {
+      await feedbackCollection.add({
+        'message': message,
+        'rating': rating + 1,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('Error submitting feedback: $e');
+    }
+  }
+}
+
+class _AnimatedCheckMark extends StatefulWidget {
+  @override
+  _AnimatedCheckMarkState createState() => _AnimatedCheckMarkState();
+}
+
+class _AnimatedCheckMarkState extends State<_AnimatedCheckMark>
+    with TickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+
+    _animation = Tween<double>(begin: 0, end: 1).animate(_controller);
+    _controller.forward();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _animation,
+      child: Icon(
+        Icons.check_circle,
+        color: Colors.green,
+        size: 36.0,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }
 

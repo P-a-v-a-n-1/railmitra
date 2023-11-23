@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 
 
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -21,7 +22,9 @@ class MyApp extends StatelessWidget {
       home: LoginPage(),
       theme: ThemeData(
         appBarTheme: AppBarTheme(
-          color: Color(0xFF004080), // Replace with your custom hex color
+          // Replace with your custom hex color
+          backgroundColor: Color(0xFF004080),
+          foregroundColor: Colors.white
         ),
       ),
     );
