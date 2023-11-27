@@ -47,7 +47,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                           });
                         },
                         child: AnimatedContainer(
-                          duration: Duration(milliseconds: 500),
+                          duration: Duration(milliseconds: 300),
                           curve: Curves.easeInOut,
                           transform: Matrix4.identity()
                             ..scale((i == _selectedEmotionIndex) ? 1.2 : 1.0),
@@ -87,12 +87,6 @@ class _FeedbackPageState extends State<FeedbackPage> {
                         ),
                       );
                     } else {
-                      // Submit feedback immediately
-                      await FeedbackService().submitFeedback(
-                        _feedbackController.text,
-                        _selectedEmotionIndex,
-                      );
-
                       // Show the feedback submission dialog
                       _showFeedbackDialog(context);
                     }
@@ -103,8 +97,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   ),
                   child: Text(
                     'Submit Feedback',
-
-                    style: TextStyle(fontSize: 18,color: Colors.white),
+                    style: TextStyle(fontSize: 18),
                   ),
                 ),
               ],
@@ -129,7 +122,11 @@ class _FeedbackPageState extends State<FeedbackPage> {
             content: Text('Thank you for your feedback.'),
             actions: [
               TextButton(
-                onPressed: () {
+                onPressed: () async {
+                  await FeedbackService().submitFeedback(
+                    _feedbackController.text,
+                    _selectedEmotionIndex,
+                  );
                   Navigator.of(context).pop(); // Close the dialog
                   _resetPage();
                 },
