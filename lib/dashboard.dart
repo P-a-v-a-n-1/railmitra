@@ -20,7 +20,10 @@ class DashboardPage extends StatelessWidget {
               },
             ),
             Expanded(child: Container()),
-            Text('Dashboard'),
+            Text(
+              'Dashboard',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             Expanded(child: Container()),
           ],
         ),
@@ -35,25 +38,24 @@ class DashboardPage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _buildDashboardSection(context, 'Seat Availability by Source and Destination', 'SeatAvailabilityPage'),
-                  SizedBox(width: 10),
+                  SizedBox(width: 20),
                   _buildDashboardSection(context, 'Seat Availability by Train Number', 'TrainAvailabilityPage'),
                 ],
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _buildDashboardSection(context, 'FAQs', 'FAQsPage'),
-                  SizedBox(width: 10),
+                  SizedBox(width: 20),
                   _buildDashboardSection(context, 'About Us', 'AboutUsPage'),
                 ],
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 20),
               _buildFeedbackSection(context, 'Feedback', 'FeedbackPage'),
             ],
           ),
         ),
-
       ),
     );
   }
@@ -63,27 +65,34 @@ class DashboardPage extends StatelessWidget {
       onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (context) => getRoute(route)));
       },
-      child: Container(
-        width: 150,
-        height: 150,
-        margin: EdgeInsets.all(10),
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Color(0xFF004080),
-          borderRadius: BorderRadius.circular(10),
+      child: Card(
+        elevation: 8,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
+        child: Container(
+          width: 160,
+          height: 160,
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            gradient: LinearGradient(
+              colors: [Color(0xFF0077B6), Color(0xFF023E8A)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Center(
+            child: Text(
               title,
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 16,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
+              textAlign: TextAlign.center,
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -94,28 +103,37 @@ class DashboardPage extends StatelessWidget {
       onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (context) => getRoute(route)));
       },
-      child: Container(
-        width: 300,
-        height: 150,
-        margin: EdgeInsets.all(10),
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Color(0xFF004080),
-          borderRadius: BorderRadius.circular(10),
+      child: Card(
+        elevation: 8,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+        child: Container(
+          width: double.infinity,
+          height: 160,
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            gradient: LinearGradient(
+              colors: [Color(0xFF0077B6), Color(0xFF023E8A)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            SizedBox(height: 10),
-          ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+            ],
+          ),
         ),
       ),
     );

@@ -12,7 +12,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
   int _selectedEmotionIndex = -1; // Default: no emoji selected
 
   // Define a list of emoji icons representing emotions
-  final List<String> _emojiList = ['🙁', '😐', '😐', '😊', '😄'];
+  final List<String> _emojiList = ['😔','🙁', '😐', '😊', '😄'];
 
   @override
   Widget build(BuildContext context) {
@@ -92,12 +92,48 @@ class _FeedbackPageState extends State<FeedbackPage> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    primary: Color(0xFF004080),
+                    primary: Colors.transparent,
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    elevation: 0, // Remove the button shadow
+                  ).copyWith(
+                    side: MaterialStateProperty.resolveWith<BorderSide>(
+                          (Set<MaterialState> states) {
+                        return BorderSide(
+                          color: Color(0xFF004080), // Border color for the button
+                        );
+                      },
+                    ),
+                    backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                          (Set<MaterialState> states) {
+                        if (states.contains(MaterialState.pressed)) {
+                          // Shiny gradient when the button is pressed
+                          return Color(0xFF002b66);
+                        } else {
+                          // Default gradient
+                          return Color(0xFF004080);
+                        }
+                      },
+                    ),
+                    overlayColor: MaterialStateProperty.all(Colors.transparent),
                   ),
-                  child: Text(
-                    'Submit Feedback',
-                    style: TextStyle(fontSize: 18),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10.0),
+                      gradient: SweepGradient(
+                        colors: [Color(0xFF0077B6), Color(0xFF023E8A)],
+                        startAngle: 0.0,
+                        endAngle: 2 * 3.14, // 2 * pi
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Submit Feedback',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -151,7 +187,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
 class FeedbackService {
   final CollectionReference feedbackCollection =
-  FirebaseFirestore.instance.collection('FeedBack');
+  FirebaseFirestore.instance.collection('Feedback');
 
   Future<void> submitFeedback(String message, int rating) async {
     try {

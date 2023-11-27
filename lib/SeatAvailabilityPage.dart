@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class SeatAvailabilityPage extends StatefulWidget {
   @override
@@ -85,14 +86,19 @@ class _SeatAvailabilityPageState extends State<SeatAvailabilityPage> {
   }
 
   void _navigateToAvailabilityPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SeatAvailabilityDisplayPage(
-          selectedDate: _selectedDate,
+    if (_selectedDate != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SeatAvailabilityDisplayPage(
+            selectedDate: _selectedDate,
+          ),
         ),
-      ),
-    );
+      );
+    } else {
+      // Handle the case when _selectedDate is null
+      // You might want to show a message or take appropriate action
+    }
   }
 }
 
@@ -104,7 +110,7 @@ class SeatAvailabilityDisplayPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: fetchSeatAvailabilityInfo(selectedDate),
+      future: selectedDate != null ? fetchSeatAvailabilityInfo(selectedDate) : null,
       builder: (context, AsyncSnapshot<List<String>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
@@ -171,7 +177,7 @@ class SeatAvailabilityDisplayPage extends StatelessWidget {
       DocumentSnapshot snapshot = await availabilityCollection.doc(selectedDate!.toLocal().toString()).get();
 
       if (snapshot.exists) {
-        return List<String>.from(snapshot.data()!['seats']);
+        return List<String>.from((snapshot.data() as Map<String, dynamic>)['seats']);
       } else {
         return [];
       }
@@ -182,7 +188,9 @@ class SeatAvailabilityDisplayPage extends StatelessWidget {
   }
 }
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MaterialApp(
     home: SeatAvailabilityPage(),
   ));

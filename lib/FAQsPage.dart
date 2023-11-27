@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+void main() {
+  runApp(MaterialApp(
+    home: FAQsPage(),
+  ));
+}
+
 class FAQsPage extends StatefulWidget {
   @override
   _FAQsPageState createState() => _FAQsPageState();
@@ -16,57 +22,53 @@ class _FAQsPageState extends State<FAQsPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: _data.map<Widget>((Item item) {
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    item.isExpanded = !item.isExpanded;
-                  });
-                },
+        child: ListView(
+          children: _data.map<Widget>((Item item) {
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  item.isExpanded = !item.isExpanded;
+                });
+              },
+              child: Card(
+                elevation: 8,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
                 child: Container(
-                  margin: EdgeInsets.only(bottom: 16.0),
+                  padding: EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(8.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 4,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.question,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF004080),
-                            fontSize: 18.0,
-                          ),
-                        ),
-                        SizedBox(height: 8.0),
-                        if (item.isExpanded)
-                          Text(
-                            item.answer,
-                            style: TextStyle(fontSize: 16),
-                            textAlign: TextAlign.justify,
-                          ),
-                      ],
+                    borderRadius: BorderRadius.circular(15),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFF004080), Color(0xFF0066B2)],
                     ),
                   ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.question,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 18.0,
+                        ),
+                      ),
+                      SizedBox(height: 8.0),
+                      if (item.isExpanded)
+                        Text(
+                          item.answer,
+                          style: TextStyle(fontSize: 16, color: Colors.white),
+                          textAlign: TextAlign.justify,
+                        ),
+                    ],
+                  ),
                 ),
-              );
-            }).toList(),
-          ),
+              ),
+            );
+          }).toList(),
         ),
       ),
     );
@@ -93,8 +95,7 @@ List<Item> generateItems() {
     ),
     Item(
       question: 'I would like to transfer my ticket to a friend. What is the process?',
-      answer: 'The rail ticket can’t be transferred to a friend. It can be transferred to blood relations (including father, mother, brother, sister, son, daughter, husband or wife) only. For transfer of ticket, an application must be submitted at least 48 hrs to 24 hours in advance of the scheduled departure of the train to the division  office Assistant Commercial Manager  or Area officer.',
-
+      answer: 'The rail ticket can’t be transferred to a friend. It can be transferred to blood relations (including father, mother, brother, sister, son, daughter, husband or wife) only. For transfer of ticket, an application must be submitted at least 48 hrs to 24 hours in advance of the scheduled departure of the train to the division office Assistant Commercial Manager or Area officer.',
     ),
     Item(
       question: 'How many days before can a reservation be done?',
@@ -102,7 +103,7 @@ List<Item> generateItems() {
     ),
     Item(
       question: 'Is it mandatory to carry a “Proof of Identity” while travelling?',
-      answer: 'Yes, it is mandatory to carry a “Proof of Identity” while travelling in reserved class. ',
+      answer: 'Yes, it is mandatory to carry a “Proof of Identity” while travelling in reserved class.',
     ),
     Item(
       question: 'What documents can be used as “proof of identity”? Will a photocopy be sufficient?',
@@ -146,8 +147,3 @@ List<Item> generateItems() {
   ];
 }
 
-void main() {
-  runApp(MaterialApp(
-    home: FAQsPage(),
-  ));
-}
