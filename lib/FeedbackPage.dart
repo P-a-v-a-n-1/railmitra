@@ -13,7 +13,7 @@ class _FeedbackPageState extends State<FeedbackPage> with SingleTickerProviderSt
   late Animation<double> _scaleAnimation;
 
   // Define a list of emoji icons representing emotions
-  final List<String> _emojiList = ['🙁', '😐', '😐', '😊', '😄'];
+  final List<String> _emojiList = ['😟','🙁', '😐', '😊', '😄'];
 
   @override
   void initState() {
