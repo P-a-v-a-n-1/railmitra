@@ -37,22 +37,22 @@ class DashboardPage extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildDashboardSection(context, 'Seat Availability by Source and Destination', 'SeatAvailabilityPage'),
+                  _buildDashboardSection(context, 'Seat Availability by Source and Destination', 'SeatAvailabilityPage', Colors.blue),
                   SizedBox(width: 20),
-                  _buildDashboardSection(context, 'Seat Availability by Train Number', 'TrainAvailabilityPage'),
+                  _buildDashboardSection(context, 'Seat Availability by Train Number', 'TrainAvailabilityPage', Colors.green),
                 ],
               ),
               SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildDashboardSection(context, 'FAQs', 'FAQsPage'),
+                  _buildDashboardSection(context, 'FAQs', 'FAQsPage', Colors.orange),
                   SizedBox(width: 20),
-                  _buildDashboardSection(context, 'About Us', 'AboutUsPage'),
+                  _buildDashboardSection(context, 'About Us', 'AboutUsPage', Colors.purple),
                 ],
               ),
               SizedBox(height: 20),
-              _buildFeedbackSection(context, 'Feedback', 'FeedbackPage'),
+              _buildFeedbackSection(context, 'Feedback', 'FeedbackPage', Colors.red),
             ],
           ),
         ),
@@ -60,10 +60,40 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDashboardSection(BuildContext context, String title, String route) {
+  Widget _buildDashboardSection(BuildContext context, String title, String route, Color backgroundColor) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => getRoute(route)));
+        Navigator.push(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) => getRoute(route),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(1.0, 0.0);
+              const end = Offset.zero;
+              const curve = Curves.easeInToLinear;
+              var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+              var offsetAnimation = animation.drive(tween);
+
+              // Add a scale transition
+              var scaleAnimation = animation.drive(Tween(begin: 0.8, end: 1.0).chain(CurveTween(curve: curve)));
+
+              return ScaleTransition(
+                scale: scaleAnimation,
+                child: SlideTransition(
+                  position: offsetAnimation,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: backgroundColor,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: child,
+                  ),
+                ),
+              );
+            },
+            transitionDuration: Duration(milliseconds: 350),
+          ),
+        );
       },
       child: Card(
         elevation: 8,
@@ -98,10 +128,39 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildFeedbackSection(BuildContext context, String title, String route) {
+  Widget _buildFeedbackSection(BuildContext context, String title, String route, Color backgroundColor) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => getRoute(route)));
+        Navigator.push(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) => getRoute(route),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(0.0, 1.0);
+              const end = Offset.zero;
+              const curve = Curves.easeInOut;
+              var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+              var offsetAnimation = animation.drive(tween);
+
+              // Add a scale transition
+              var scaleAnimation = animation.drive(Tween(begin: 0.8, end: 1.0).chain(CurveTween(curve: curve)));
+
+              return ScaleTransition(
+                scale: scaleAnimation,
+                child: SlideTransition(
+                  position: offsetAnimation,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: backgroundColor,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: child,
+                  ),
+                ),
+              );
+            },
+          ),
+        );
       },
       child: Card(
         elevation: 8,

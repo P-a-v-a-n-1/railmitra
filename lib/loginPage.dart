@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dashboard.dart'; // Import the dashboard page
-import 'signUp.dart'; // Import the sign-up page
+import 'dashboard.dart';
+import 'signUp.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -19,129 +19,143 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(
         title: Center(child: Text('Rail Mitra')),
+        backgroundColor: Color(0xFF004080),
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Container(
-            padding: const EdgeInsets.all(16.0),
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 2,
-                    blurRadius: 4,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-                borderRadius: BorderRadius.circular(8.0),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF0268B2), Color(0xFF004080)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Card(
+              elevation: 8,
+              margin: EdgeInsets.all(16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.0),
               ),
-              child: Column(
-                children: [
-                  // Image
-                  Image.asset(
-                    'assets/images/chat.png',
-                    height: 100,
-                    width: 100,
-                  ),
-                  SizedBox(height: 20),
-                  // Username Box
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(8.0),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Image.asset(
+                      'assets/images/chat.png',
+                      height: 100,
+                      width: 100,
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: TextField(
-                        controller: _usernameController,
-                        decoration: InputDecoration(
-                          labelText: 'Username',
-                          border: InputBorder.none,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  // Password Box
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: TextField(
-                        controller: _passwordController,
-                        obscureText: !_isPasswordVisible,
-                        decoration: InputDecoration(
-                          labelText: 'Password',
-                          border: InputBorder.none,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _isPasswordVisible = !_isPasswordVisible;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  // Login Button with Circular Loading Indicator
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Color(0xFF004080),
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: _isLoading
-                        ? Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                        : TextButton(
-                      onPressed: () async {
-                        await _login();
-                      },
-                      child: Text(
-                        'Login',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  // Don't have an account? Sign up
-                  TextButton(
-                    onPressed: () {
-                      // Navigate to the SignUpPage when the text is pressed
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SignUpPage(),
-                        ),
-                      );
-                    },
-                    child: Text(
-                      "Don't have an account? Sign up",
-                      style: TextStyle(
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                ],
+                    SizedBox(height: 20),
+                    _buildTextField(_usernameController, 'Username'),
+                    SizedBox(height: 20),
+                    _buildPasswordField(_passwordController, 'Password'),
+                    SizedBox(height: 20),
+                    _buildLoginButton(),
+                    SizedBox(height: 10),
+                    _buildSignUpButton(),
+                  ],
+                ),
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String label) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: TextField(
+          controller: controller,
+          style: TextStyle(color: Colors.black),
+          decoration: InputDecoration(
+            labelText: label,
+            border: InputBorder.none,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPasswordField(TextEditingController controller, String label) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: TextField(
+          controller: controller,
+          obscureText: !_isPasswordVisible,
+          style: TextStyle(color: Colors.black),
+          decoration: InputDecoration(
+            labelText: label,
+            border: InputBorder.none,
+            suffixIcon: IconButton(
+              icon: Icon(
+                _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+              ),
+              onPressed: () {
+                setState(() {
+                  _isPasswordVisible = !_isPasswordVisible;
+                });
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoginButton() {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Color(0xFF004080),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: _isLoading
+          ? Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        ),
+      )
+          : TextButton(
+        onPressed: () async {
+          await _login();
+        },
+        child: Text(
+          'Login',
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSignUpButton() {
+    return TextButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SignUpPage(),
+          ),
+        );
+      },
+      child: Text(
+        "Don't have an account? Sign up",
+        style: TextStyle(
+          color: Colors.blue,
+          decoration: TextDecoration.underline,
         ),
       ),
     );
@@ -158,7 +172,6 @@ class _LoginPageState extends State<LoginPage> {
         password: _passwordController.text,
       );
 
-      // If authentication is successful, navigate to the DashboardPage
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -166,11 +179,9 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
     } catch (e) {
-      // If authentication fails, show an error message
       String errorMessage = e.toString();
 
       if (errorMessage.contains('user-not-found')) {
-        // User not found, display a specific message and navigate to the sign-up page
         errorMessage = "Looks like you have not registered! Please sign up.";
         showDialog(
           context: context,
@@ -182,7 +193,6 @@ class _LoginPageState extends State<LoginPage> {
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    // Navigate to the SignUpPage
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -197,7 +207,6 @@ class _LoginPageState extends State<LoginPage> {
           },
         );
       } else {
-        // For other errors, display the generic error message
         showDialog(
           context: context,
           builder: (BuildContext context) {
