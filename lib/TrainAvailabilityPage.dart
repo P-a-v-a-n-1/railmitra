@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 class TrainAvailabilityPage extends StatefulWidget {
   @override
@@ -9,7 +10,41 @@ class TrainAvailabilityPage extends StatefulWidget {
 class _TrainAvailabilityPageState extends State<TrainAvailabilityPage> {
   TextEditingController _trainNumberController = TextEditingController();
   String _trainNumber = '';
-  String _trainName = ''; // New variable to store the train name
+  String _trainName = '';
+  bool _isButtonClicked = false;
+
+  final List<String> trainNumbersList = [
+    '01139',
+    '01140',
+    '07335',
+    '07336',
+    '07377',
+    '07378',
+    '10105',
+    '10106',
+    '12217',
+    '12218',
+    '12431',
+    '12432',
+    '12609',
+    '12610',
+    '12629',
+    '12630',
+    '12845',
+    '12846',
+    '14553',
+    '14554',
+    '16591',
+    '16592',
+    '16594',
+    '16595',
+    '17415',
+    '17416',
+    '18111',
+    '18112',
+    '22887',
+    '22888',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -19,139 +54,189 @@ class _TrainAvailabilityPageState extends State<TrainAvailabilityPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildInputField('Enter Train Number', _trainNumberController),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                _fetchTrainDetails();
-              },
-              child: Text('Get Train Details'),
-            ),
-            SizedBox(height: 20),
-            if (_trainNumber.isNotEmpty && _trainName.isNotEmpty) // Show only if both are not empty
-              Card(
-                elevation: 5,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Train Details:',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.all(8),
-                            color: Colors.blue,
-                            child: Text(
-                              '$_trainNumber',
-                              style: TextStyle(fontSize: 16, color: Colors.white,fontWeight: FontWeight.w900),
-                            ),
-                          ),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              ' $_trainName',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                    ],
-                  ),
-                ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildInputField(),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  if (_trainNumber.isNotEmpty) {
+                    _fetchTrainDetails();
+                    setState(() {
+                      _isButtonClicked = true;
+                    });
+                  } else {
+                    // Handle case where train number is empty
+                    print('Train number is empty');
+                  }
+                },
+                child: Text('Get Train Details'),
               ),
-          ],
+              SizedBox(height: 20),
+              _isButtonClicked && _trainNumber.isNotEmpty
+                  ? FutureBuilder<DocumentSnapshot<Object?>>(
+                future: FirebaseFirestore.instance
+                    .collection('Trains')
+                    .doc(_trainNumber)
+                    .get(),
+                builder: (context, snapshot) {
+                  return _buildTrainDetails(snapshot);
+                },
+              )
+                  : Container(),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildInputField(String label, TextEditingController controller) {
-    return TextFormField(
-      controller: controller,
-      style: TextStyle(color: Colors.black),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(color: Colors.black),
-        border: OutlineInputBorder(),
+  Widget _buildInputField() {
+    return TypeAheadFormField<String>(
+      textFieldConfiguration: TextFieldConfiguration(
+        controller: _trainNumberController,
+        onChanged: (value) {
+          setState(() {
+            _trainNumber = value;
+          });
+        },
+        decoration: InputDecoration(
+          labelText: 'Enter Train Number',
+          border: OutlineInputBorder(),
+        ),
       ),
+      suggestionsCallback: (pattern) {
+        return trainNumbersList
+            .where((trainNumber) =>
+        trainNumber.contains(pattern) || pattern.isEmpty)
+            .toList();
+      },
+      itemBuilder: (context, suggestion) {
+        return ListTile(
+          title: Text(suggestion),
+        );
+      },
+      onSuggestionSelected: (suggestion) {
+        setState(() {
+          _trainNumber = suggestion;
+          _trainNumberController.text = suggestion; // Populate the input box
+        });
+      },
     );
   }
 
-  Future<void> _fetchTrainDetails() async {
-    String trainNumber = _trainNumberController.text.trim();
+  Widget _buildTrainDetails(AsyncSnapshot<DocumentSnapshot<Object?>> snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return CircularProgressIndicator();
+    } else if (snapshot.hasData) {
+      final DocumentSnapshot<Object?> trainSnapshot = snapshot.data!;
+      print('Train document data: ${trainSnapshot.data()}');
 
-    if (trainNumber.isNotEmpty) {
-      try {
-        CollectionReference trainsCollection = FirebaseFirestore.instance.collection('Trains');
-
-        // Print the train number for debugging
-        print('Fetching details for train number: $trainNumber');
-
-        DocumentSnapshot snapshot = await trainsCollection.doc(trainNumber).get();
-
-        if (snapshot.exists) {
-          setState(() {
-            _trainNumber = trainNumber; // Assign the train number to the variable
-            _trainName = snapshot['name']; // Fetch and assign the train name
-          });
-        } else {
-          // Handle the case when the document for the given train number does not exist
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: Text('Train Not Found'),
-                content: Text('No train found for the given number.'),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context); // Close the dialog
-                    },
-                    child: Text('OK'),
+      return Card(
+        elevation: 5,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ListTile(
+                title: Text(
+                  'Train Details:',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
-              );
-            },
-          );
-        }
-      } catch (e) {
-        print('Error fetching train details: $e');
-        // Handle the error
-      }
-    } else {
-      // Handle the case when the user did not provide a train number
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text('Invalid Train Number'),
-            content: Text('Please enter a valid train number.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context); // Close the dialog
+                ),
+                subtitle: Text(
+                  'Train Number: $_trainNumber\nTrain Name: $_trainName',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+              SizedBox(height: 10),
+              StreamBuilder<QuerySnapshot<Object?>>(
+                stream: FirebaseFirestore.instance
+                    .collectionGroup('seats')
+                    .where('train number', isEqualTo: _trainNumber)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else if (snapshot.hasData) {
+                    final List<DocumentSnapshot<Object?>> seatDocs =
+                        snapshot.data!.docs;
+                    print(
+                        'Number of documents in seats collection: ${seatDocs.length}');
+
+                    if (seatDocs.isNotEmpty) {
+                      return Card(
+                        margin: EdgeInsets.symmetric(vertical: 10),
+                        elevation: 5,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: DataTable(
+                              columns: [
+                                DataColumn(label: Text('Station Name')),
+                                DataColumn(label: Text('AC')),
+                                DataColumn(label: Text('Sleeper')),
+                                DataColumn(label: Text('General')),
+                              ],
+                              rows: seatDocs.map<DataRow>((seat) {
+                                return DataRow(
+                                  cells: [
+                                    DataCell(Text(
+                                        '${seat['station name'] ?? 'N/A'}')),
+                                    DataCell(
+                                        Text('${seat['ac'] ?? 0}')),
+                                    DataCell(
+                                        Text('${seat['sleeper'] ?? 0}')),
+                                    DataCell(
+                                        Text('${seat['general'] ?? 0}')),
+                                  ],
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ),
+                      );
+                    } else {
+                      print('No seats available - empty collection');
+                      return Text('No seats available');
+                    }
+                  } else {
+                    print('Error fetching seats data: ${snapshot.error}');
+                    return Text('Something went wrong');
+                  }
                 },
-                child: Text('OK'),
               ),
             ],
-          );
-        },
+          ),
+        ),
       );
+    } else {
+      return Text('Something went wrong');
     }
   }
-}
 
-void main() {
-  runApp(MaterialApp(
-    home: TrainAvailabilityPage(),
-  ));
+  void _fetchTrainDetails() {
+    FirebaseFirestore.instance
+        .collection('Trains')
+        .doc(_trainNumber)
+        .get()
+        .then((doc) {
+      if (doc.exists) {
+        setState(() {
+          _trainName = doc['name'];
+        });
+      } else {
+        setState(() {
+          _trainName = '';
+        });
+        print('Train not found');
+      }
+    });
+  }
 }
