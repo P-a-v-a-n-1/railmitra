@@ -103,6 +103,7 @@ class _SeatAvailabilityPageState extends State<SeatAvailabilityPage> {
     } else {
       // Handle the case when _selectedDate, source station, or destination station is null or empty
       // You might want to show a message or take appropriate action
+      print('Please fill in all the details.');
     }
   }
 }
@@ -121,9 +122,9 @@ class SeatAvailabilityDisplayPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
+    return FutureBuilder<List<TrainAvailability>>(
       future: fetchSeatAvailabilityInfo(selectedDate, sourceStation, destinationStation),
-      builder: (context, AsyncSnapshot<List<TrainAvailability>> snapshot) {
+      builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
             appBar: AppBar(
@@ -213,47 +214,76 @@ class SeatAvailabilityDisplayPage extends StatelessWidget {
       String destinationStation,
       ) async {
     try {
-      CollectionReference trainsCollection = FirebaseFirestore.instance.collection('Trains');
+      // Print parameters being sent to the function
+      print('Fetching seat availability info for:');
+      print('Selected Date: $selectedDate');
+      print('Source Station: $sourceStation');
+      print('Destination Station: $destinationStation');
+
+      CollectionReference seatsCollection = FirebaseFirestore.instance.collection('seats');
 
       // Format the selected date to match the Firestore document key
       String formattedDate = selectedDate != null
-          ? "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}"
+          ? "${selectedDate.day}-${_getMonthAbbreviation(selectedDate.month)}-${selectedDate.year}"
           : "";
 
       // Query availability based on date and stations
-      DocumentSnapshot snapshot = await trainsCollection.doc(formattedDate).get();
+      QuerySnapshot<Object?> seatsQuerySnapshot = await seatsCollection
+          .where('station name', whereIn: [sourceStation, destinationStation])
+          .where('date', isEqualTo: formattedDate)
+          .get();
 
-      if (snapshot.exists) {
-        Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+      // Print raw data from seats collection
+      print('Raw data from seats collection:');
+      seatsQuerySnapshot.docs.forEach((seatDoc) {
+        print(seatDoc.data());
+      });
 
-        print('Data from Firestore: $data');
+      // Extract train numbers from the seats query result
+      List<String> trainNumbers = [];
+      seatsQuerySnapshot.docs.forEach((seatDoc) {
+        trainNumbers.add(seatDoc['train number']);
+      });
 
-        List<TrainAvailability> trainAvailabilityList = [];
+      // Print extracted train numbers
+      print('Extracted train numbers: $trainNumbers');
+
+      if (trainNumbers.isNotEmpty) {
+        // Query trains based on the obtained train numbers
+        CollectionReference trainsCollection = FirebaseFirestore.instance.collection('Trains');
+        QuerySnapshot<Object?> trainsQuerySnapshot = await trainsCollection
+            .where(FieldPath.documentId, whereIn: trainNumbers)
+            .get();
+
+        // Print raw data from trains collection
+        print('Raw data from trains collection:');
+        trainsQuerySnapshot.docs.forEach((trainDoc) {
+          print(trainDoc.data());
+        });
 
         // Extract train availability information
-        data['Trains']?.forEach((trainNumber, trainData) {
-          print('Checking train: $trainNumber');
+        List<TrainAvailability> trainAvailabilityList = trainsQuerySnapshot.docs.map((trainDoc) {
+          Map<String, dynamic> trainData = trainDoc.data() as Map<String, dynamic>;
 
-          if (trainData['schedule'] != null &&
-              trainData['schedule'].contains(sourceStation) &&
-              trainData['schedule'].contains(destinationStation)) {
-            print('Found matching train: $trainNumber');
+          return TrainAvailability(
+            trainNumber: trainDoc.id,
+            trainName: trainData['trainName'],
+            generalSeatsAvailable: trainData['genSeats'][0] ?? 0,
+            acSeatsAvailable: trainData['genSeats'][1] ?? 0,
+            sleeperSeatsAvailable: trainData['genSeats'][2] ?? 0,
+          );
+        }).toList();
 
-            trainAvailabilityList.add(
-              TrainAvailability(
-                trainNumber: trainNumber,
-                trainName: trainData['trainName'],
-                generalSeatsAvailable: trainData['genSeats'][0] ?? 0,
-                acSeatsAvailable: trainData['genSeats'][1] ?? 0,
-                sleeperSeatsAvailable: trainData['genSeats'][2] ?? 0,
-              ),
-            );
-          }
+        // Print extracted train availability information
+        print('Extracted train availability information:');
+        trainAvailabilityList.forEach((trainAvailability) {
+          print(trainAvailability);
         });
 
         return trainAvailabilityList;
       } else {
-        print('No document found for date: $formattedDate');
+        // No matching seats found
+        print('No matching seats found for date: $formattedDate, source: $sourceStation, destination: $destinationStation');
         return [];
       }
     } catch (e) {
@@ -262,7 +292,11 @@ class SeatAvailabilityDisplayPage extends StatelessWidget {
     }
   }
 
-
+  // Helper function to get the abbreviated month name
+  String _getMonthAbbreviation(int month) {
+    const List<String> months = ['jan', 'feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months[month - 1];
+  }
 }
 
 class TrainAvailability {
