@@ -277,7 +277,7 @@ class SeatAvailabilityDisplayPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Seat Availability'),
+        title: Text('Train Availability'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -342,20 +342,7 @@ class SeatAvailabilityDisplayPage extends StatelessWidget {
                                   style: TextStyle(fontSize: 16),
                                 ),
                                 SizedBox(height: 8),
-                                Text(
-                                  'General Seats Available: ${trainAvailability.generalSeatsAvailable}',
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                                SizedBox(height: 8),
-                                Text(
-                                  'AC Seats Available: ${trainAvailability.acSeatsAvailable}',
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                                SizedBox(height: 8),
-                                Text(
-                                  'Sleeper Seats Available: ${trainAvailability.sleeperSeatsAvailable}',
-                                  style: TextStyle(fontSize: 16),
-                                ),
+
                               ],
                             ),
                           ),

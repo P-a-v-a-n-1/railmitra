@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -12,6 +13,13 @@ class FAQsPage extends StatefulWidget {
 }
 
 class _FAQsPageState extends State<FAQsPage> {
+  FlutterTts flutterTts = FlutterTts();
+  double speechRate = 0.5;
+  double pitch =1.0;
+  // Adjust this value to control the speech rate
+  bool isSpeaking = false;
+  bool isMaleVoice = true; // Flag to track the voice gender
+
   List<Item> _data = generateItems();
 
   @override
@@ -29,6 +37,12 @@ class _FAQsPageState extends State<FAQsPage> {
                 setState(() {
                   item.isExpanded = !item.isExpanded;
                 });
+                if (item.isExpanded && isSpeaking) {
+                  _stop();
+                  setState(() {
+                    isSpeaking = false;
+                  });
+                }
               },
               child: Card(
                 elevation: 8,
@@ -58,10 +72,40 @@ class _FAQsPageState extends State<FAQsPage> {
                       ),
                       SizedBox(height: 8.0),
                       if (item.isExpanded)
-                        Text(
-                          item.answer,
-                          style: TextStyle(fontSize: 16, color: Colors.white),
-                          textAlign: TextAlign.justify,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.answer,
+                              style: TextStyle(fontSize: 16, color: Colors.white),
+                              textAlign: TextAlign.justify,
+                            ),
+                            SizedBox(height: 8.0),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                IconButton(
+                                  icon: Icon(
+                                    isSpeaking
+                                        ? Icons.volume_up
+                                        : Icons.volume_off,
+                                    color: Colors.white,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      isSpeaking = !isSpeaking;
+                                    });
+                                    if (isSpeaking) {
+                                      _speak(item.answer);
+                                    } else {
+                                      _stop();
+                                    }
+                                  },
+                                ),
+
+                              ],
+                            ),
+                          ],
                         ),
                     ],
                   ),
@@ -72,6 +116,45 @@ class _FAQsPageState extends State<FAQsPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _speak(String text) async {
+    if (isSpeaking) {
+      await flutterTts.stop();
+    }
+
+    if (!isMaleVoice) {
+      await flutterTts.setVoice({"name": "en-in-x-sfg#male_1-local"});
+    } else {
+      // You can set the male voice here if needed
+      // await flutterTts.setVoice({"name": "en-in-x-sfg#female_1-local"});
+    }
+
+    await flutterTts.setSpeechRate(speechRate);
+    await flutterTts.speak(text);
+
+    setState(() {
+      isSpeaking = true;
+    });
+  }
+
+  Future<void> _stop() async {
+    await flutterTts.stop();
+    setState(() {
+      isSpeaking = false;
+    });
+  }
+
+  void _changeVoice() async {
+    // Add code here if you want to handle voice change
+    // For example, you might stop speech and change the voice immediately
+    if (isSpeaking) {
+      await flutterTts.stop();
+      await flutterTts.setVoice({
+        "name": isMaleVoice ? "en-in-x-sfg#male_1-local" : "en-in-x-sfg#female_1-local"
+      });
+      await flutterTts.speak("Voice changed");
+    }
   }
 }
 
@@ -146,4 +229,3 @@ List<Item> generateItems() {
     ),
   ];
 }
-

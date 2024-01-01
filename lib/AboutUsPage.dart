@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class AboutUsPage extends StatelessWidget {
   final Color highlightColor = Color(0xFF004080);
@@ -82,7 +81,7 @@ class AboutUsPage extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 10),
-              buildClickableEmailText('Have questions, suggestions, or feedback? We value your input! Contact us at railmitra2@gmail.com.'),
+              buildClickableEmailText(context, 'Have questions, suggestions, or feedback? We value your input! Contact us at railmitra2@gmail.com.'),
               SizedBox(height: 20),
               Text(
                 'Thank you for choosing Rail Mitra. We look forward to being your trusted partner on your travel adventures!',
@@ -96,33 +95,16 @@ class AboutUsPage extends StatelessWidget {
     );
   }
 
-  Widget buildClickableEmailText(String text) {
+  Widget buildClickableEmailText(BuildContext context, String text) {
     return InkWell(
-      onTap: () => _launchEmail('railmitra2@gmail.com'),
+      onTap: () {
+        // Handle the action you want when the email is clicked
+        // For example, you can open the default email app
+      },
       child: Text(
         text,
         style: TextStyle(fontSize: 16, color: highlightColor, decoration: TextDecoration.underline),
       ),
     );
   }
-
-  _launchEmail(String email) async {
-    final Uri params = Uri(
-      scheme: 'mailto',
-      path: email,
-    );
-    String url = params.toString();
-    try {
-      if (await canLaunch(url)) {
-        await launch(url, forceSafariVC: false, forceWebView: false, enableJavaScript: true, universalLinksOnly: false);
-      } else {
-        throw 'Could not launch $url';
-      }
-    } catch (e) {
-      print('Error launching email: $e');
-    }
-  }
-
 }
-
-

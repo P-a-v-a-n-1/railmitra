@@ -37,7 +37,7 @@ class DashboardPage extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildDashboardSection(context, 'Seat Availability by Source and Destination', 'SeatAvailabilityPage', Colors.blue),
+                  _buildDashboardSection(context, 'Train Availability by Source and Destination', 'SeatAvailabilityPage', Colors.blue),
                   SizedBox(width: 20),
                   _buildDashboardSection(context, 'Seat Availability by Train Number', 'TrainAvailabilityPage', Colors.green),
                 ],
