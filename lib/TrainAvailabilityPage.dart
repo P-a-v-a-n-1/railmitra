@@ -221,6 +221,7 @@ class _TrainAvailabilityPageState extends State<TrainAvailabilityPage> {
     }
   }
 
+
   void _fetchTrainDetails() {
     FirebaseFirestore.instance
         .collection('Trains')

@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(MaterialApp(
+    home: SeatAvailabilityPage(),
+  ));
+}
 
 class SeatAvailabilityPage extends StatefulWidget {
   @override
@@ -11,6 +20,104 @@ class _SeatAvailabilityPageState extends State<SeatAvailabilityPage> {
   DateTime? _selectedDate;
   TextEditingController _fromController = TextEditingController();
   TextEditingController _toController = TextEditingController();
+  List<String> trainNumbers = [
+    '01139',
+    '01140',
+    '07335',
+    '07336',
+    '07377',
+    '07378',
+    '10105',
+    '10106',
+    '12217',
+    '12218',
+    '12431',
+    '12432',
+    '12609',
+    '12610',
+    '12629',
+    '12630',
+    '12845',
+    '12846',
+    '14553',
+    '14554',
+    '16591',
+    '16592',
+    '16594',
+    '16595',
+    '17415',
+    '17416',
+    '18111',
+    '18112',
+    '22887',
+    '22888'
+  ];
+
+  final List<String> stationsList = [
+
+    'Guntkal',
+    'Ballari',
+    'Torangallu',
+    'Hosapete',
+    'Gadag',
+    'Koppala',
+    'SSS Hubballi',
+    'Dharwad',
+    'Kazipet',
+    'Mantralayam',
+    'Belagavi',
+    'Kazipet',
+    'Mantralayam',
+    'Guntkal',
+    'Ballari',
+    'Torangallu',
+    'Hosapete',
+    'Koppala',
+    'Gadag',
+    'SSS Hubballi',
+    'Dharwad',
+    'Belagavi',
+    'Nagpur',
+    'Bandera',
+    'Sheagon',
+    'Nashik Road',
+    'Panvel',
+    'Ratnagiri',
+    'Kudal',
+    'Thivim',
+    'Karmali',
+    'Madagaon',
+    'Madagaon',
+    'Karmali',
+    'Thivim',
+    'Kudal',
+    'Ratnagiri',
+    'Panvel',
+    'Nashik Road',
+    'Sheagon',
+    'Bandera',
+    'Nagpur',
+    'Vijayapura',
+    'Bagalkote',
+    'BADAMI',
+    'Gadag',
+    'SSS Hubballi',
+    'Haveri',
+    'Birur',
+    'Hassan',
+    'Subrahmnya rd',
+    'Mangaluru Junction',
+    'Vijayapura',
+    'Bagalkote',
+    'Badami',
+    'Gadag',
+    'SSS Hubballi',
+    'Haveri',
+    'Birur',
+    'Hassan',
+    'Subrahmnya rd',
+    'Mangaluru Junction',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -20,36 +127,55 @@ class _SeatAvailabilityPageState extends State<SeatAvailabilityPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildInputField('From Station', _fromController),
-            SizedBox(height: 20),
-            _buildInputField('To Station', _toController),
-            SizedBox(height: 20),
-            _buildDateInputField(),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                _navigateToAvailabilityPage();
-              },
-              child: Text('Check Availability'),
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildTypeAhead('From Station', _fromController, stationsList),
+              SizedBox(height: 20),
+              _buildTypeAhead('To Station', _toController, stationsList),
+              SizedBox(height: 20),
+              _buildDateInputField(),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  _navigateToAvailabilityPage();
+                },
+                child: Text('Check Availability'),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildInputField(String label, TextEditingController controller) {
-    return TextFormField(
-      controller: controller,
-      style: TextStyle(color: Colors.black),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(color: Colors.black),
-        border: OutlineInputBorder(),
+  Widget _buildTypeAhead(
+      String label, TextEditingController controller, List<String> suggestionsList) {
+    return TypeAheadFormField(
+      textFieldConfiguration: TextFieldConfiguration(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(),
+        ),
       ),
+      suggestionsCallback: (pattern) {
+        return suggestionsList
+            .where((station) => station.toLowerCase().contains(pattern.toLowerCase()))
+            .toList();
+      },
+      itemBuilder: (context, suggestion) {
+        return ListTile(
+          title: Text(suggestion),
+        );
+      },
+      transitionBuilder: (context, suggestionsBox, controller) {
+        return suggestionsBox;
+      },
+      onSuggestionSelected: (suggestion) {
+        controller.text = suggestion;
+      },
     );
   }
 
@@ -74,6 +200,13 @@ class _SeatAvailabilityPageState extends State<SeatAvailabilityPage> {
   }
 
   Future<void> _selectDate() async {
+    var seatNumbersQuery = await FirebaseFirestore.instance
+        .collection('seats')
+        .where('stationName', whereIn: [_fromController.text, _toController.text])
+        .get();
+
+    trainNumbers = seatNumbersQuery.docs.map((doc) => doc['trainNumber'] as String).toList();
+
     DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -89,7 +222,9 @@ class _SeatAvailabilityPageState extends State<SeatAvailabilityPage> {
   }
 
   void _navigateToAvailabilityPage() {
-    if (_selectedDate != null && _fromController.text.isNotEmpty && _toController.text.isNotEmpty) {
+    if (_selectedDate != null &&
+        _fromController.text.isNotEmpty &&
+        _toController.text.isNotEmpty) {
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -97,33 +232,56 @@ class _SeatAvailabilityPageState extends State<SeatAvailabilityPage> {
             selectedDate: _selectedDate,
             sourceStation: _fromController.text,
             destinationStation: _toController.text,
+            trainNumbers: trainNumbers,
           ),
         ),
       );
     } else {
-      // Handle the case when _selectedDate, source station, or destination station is null or empty
-      // You might want to show a message or take appropriate action
       print('Please fill in all the details.');
     }
   }
+}
+
+String _getMonthAbbreviation(int month) {
+  const List<String> months = [
+    'jan',
+    'feb',
+    'mar',
+    'apr',
+    'may',
+    'jun',
+    'jul',
+    'aug',
+    'sep',
+    'oct',
+    'nov',
+    'dec'
+  ];
+  return months[month - 1];
 }
 
 class SeatAvailabilityDisplayPage extends StatelessWidget {
   final DateTime? selectedDate;
   final String sourceStation;
   final String destinationStation;
+  final List<String> trainNumbers;
 
   SeatAvailabilityDisplayPage({
     Key? key,
     required this.selectedDate,
     required this.sourceStation,
     required this.destinationStation,
+    required this.trainNumbers,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<TrainAvailability>>(
-      future: fetchSeatAvailabilityInfo(selectedDate, sourceStation, destinationStation),
+      future: fetchSeatAvailabilityInfo(
+        selectedDate,
+        sourceStation,
+        destinationStation,
+      ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
@@ -214,67 +372,59 @@ class SeatAvailabilityDisplayPage extends StatelessWidget {
       String destinationStation,
       ) async {
     try {
-      // Print parameters being sent to the function
       print('Fetching seat availability info for:');
-      print('Selected Date: $selectedDate');
+
       print('Source Station: $sourceStation');
       print('Destination Station: $destinationStation');
 
       CollectionReference seatsCollection = FirebaseFirestore.instance.collection('seats');
 
-      // Format the selected date to match the Firestore document key
       String formattedDate = selectedDate != null
           ? "${selectedDate.day}-${_getMonthAbbreviation(selectedDate.month)}-${selectedDate.year}"
           : "";
-
-      // Query availability based on date and stations
+      print('Selected Date: $formattedDate');
       QuerySnapshot<Object?> seatsQuerySnapshot = await seatsCollection
           .where('station name', whereIn: [sourceStation, destinationStation])
-          .where('date', isEqualTo: formattedDate)
+      //.where('date', isEqualTo: formattedDate)
           .get();
 
-      // Print raw data from seats collection
       print('Raw data from seats collection:');
       seatsQuerySnapshot.docs.forEach((seatDoc) {
         print(seatDoc.data());
       });
 
-      // Extract train numbers from the seats query result
       List<String> trainNumbers = [];
       seatsQuerySnapshot.docs.forEach((seatDoc) {
-        trainNumbers.add(seatDoc['train number']);
+        var trainNumber = seatDoc['train number'] as String?;
+        if (trainNumber != null) {
+          trainNumbers.add(trainNumber);
+        }
       });
-
-      // Print extracted train numbers
       print('Extracted train numbers: $trainNumbers');
 
       if (trainNumbers.isNotEmpty) {
-        // Query trains based on the obtained train numbers
         CollectionReference trainsCollection = FirebaseFirestore.instance.collection('Trains');
         QuerySnapshot<Object?> trainsQuerySnapshot = await trainsCollection
             .where(FieldPath.documentId, whereIn: trainNumbers)
             .get();
 
-        // Print raw data from trains collection
         print('Raw data from trains collection:');
         trainsQuerySnapshot.docs.forEach((trainDoc) {
           print(trainDoc.data());
         });
 
-        // Extract train availability information
         List<TrainAvailability> trainAvailabilityList = trainsQuerySnapshot.docs.map((trainDoc) {
           Map<String, dynamic> trainData = trainDoc.data() as Map<String, dynamic>;
 
           return TrainAvailability(
             trainNumber: trainDoc.id,
-            trainName: trainData['trainName'],
-            generalSeatsAvailable: trainData['genSeats'][0] ?? 0,
-            acSeatsAvailable: trainData['genSeats'][1] ?? 0,
-            sleeperSeatsAvailable: trainData['genSeats'][2] ?? 0,
+            trainName: trainData['name'],
+            generalSeatsAvailable: 1,
+            acSeatsAvailable: 2,
+            sleeperSeatsAvailable: 3,
           );
         }).toList();
 
-        // Print extracted train availability information
         print('Extracted train availability information:');
         trainAvailabilityList.forEach((trainAvailability) {
           print(trainAvailability);
@@ -282,20 +432,14 @@ class SeatAvailabilityDisplayPage extends StatelessWidget {
 
         return trainAvailabilityList;
       } else {
-        // No matching seats found
-        print('No matching seats found for date: $formattedDate, source: $sourceStation, destination: $destinationStation');
+        print(
+            'No matching seats found for date: $formattedDate, source: $sourceStation, destination: $destinationStation');
         return [];
       }
     } catch (e) {
       print('Error fetching seat availability info: $e');
       throw 'Error fetching seat availability info';
     }
-  }
-
-  // Helper function to get the abbreviated month name
-  String _getMonthAbbreviation(int month) {
-    const List<String> months = ['jan', 'feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return months[month - 1];
   }
 }
 
@@ -313,12 +457,4 @@ class TrainAvailability {
     required this.acSeatsAvailable,
     required this.sleeperSeatsAvailable,
   });
-}
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(MaterialApp(
-    home: SeatAvailabilityPage(),
-  ));
 }
