@@ -54,7 +54,6 @@ class _SeatAvailabilityPageState extends State<SeatAvailabilityPage> {
   ];
 
   final List<String> stationsList = [
-
     'Guntkal',
     'Ballari',
     'Torangallu',
@@ -205,7 +204,8 @@ class _SeatAvailabilityPageState extends State<SeatAvailabilityPage> {
         .where('stationName', whereIn: [_fromController.text, _toController.text])
         .get();
 
-    trainNumbers = seatNumbersQuery.docs.map((doc) => doc['trainNumber'] as String).toList();
+    trainNumbers =
+        seatNumbersQuery.docs.map((doc) => doc['trainNumber'] as String).toList();
 
     DateTime? picked = await showDatePicker(
       context: context,
@@ -259,7 +259,6 @@ String _getMonthAbbreviation(int month) {
   ];
   return months[month - 1];
 }
-
 class SeatAvailabilityDisplayPage extends StatelessWidget {
   final DateTime? selectedDate;
   final String sourceStation;
@@ -276,170 +275,188 @@ class SeatAvailabilityDisplayPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<TrainAvailability>>(
-      future: fetchSeatAvailabilityInfo(
-        selectedDate,
-        sourceStation,
-        destinationStation,
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Seat Availability'),
       ),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Scaffold(
-            appBar: AppBar(
-              title: Text('Seat Availability'),
-            ),
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        } else if (snapshot.hasError) {
-          return Scaffold(
-            appBar: AppBar(
-              title: Text('Seat Availability'),
-            ),
-            body: Center(
-              child: Text('Error: ${snapshot.error}'),
-            ),
-          );
-        } else {
-          List<TrainAvailability> trainAvailabilityList = snapshot.data ?? [];
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Seat Availability for ${selectedDate != null ? '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}' : 'No Date Selected'}',
+                style: TextStyle(fontSize: 20),
+              ),
+              SizedBox(height: 10),
+              Text(
+                'Trains from $sourceStation to $destinationStation:',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              FutureBuilder<List<TrainAvailability>>(
+                future: fetchSeatAvailabilityInfo(
+                  selectedDate,
+                  sourceStation,
+                  destinationStation,
+                  trainNumbers,
+                ),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text('Error: ${snapshot.error}'),
+                    );
+                  } else {
+                    List<TrainAvailability> trainAvailabilityList = snapshot.data ?? [];
 
-          return Scaffold(
-            appBar: AppBar(
-              title: Text('Seat Availability'),
-            ),
-            body: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Seat Availability for ${selectedDate != null ? '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}' : 'No Date Selected'}',
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    'Trains from $sourceStation to $destinationStation:',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 10),
-                  if (trainAvailabilityList.isNotEmpty)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    if (trainAvailabilityList.isEmpty) {
+                      return Center(
+                          child: Text(
+                            'No train available for the specified date and route.',
+                            style: TextStyle(fontSize: 18),
+                          ),
+                      );
+                    }
+
+                    return Column(
                       children: trainAvailabilityList.map((trainAvailability) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Train Number: ${trainAvailability.trainNumber}',
-                              style: TextStyle(fontSize: 16),
+                        return Card(
+                          margin: EdgeInsets.symmetric(vertical: 10),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Train Number: ${trainAvailability.trainNumber}',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  'Train Name: ${trainAvailability.trainName}',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  'General Seats Available: ${trainAvailability.generalSeatsAvailable}',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  'AC Seats Available: ${trainAvailability.acSeatsAvailable}',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  'Sleeper Seats Available: ${trainAvailability.sleeperSeatsAvailable}',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                              ],
                             ),
-                            Text(
-                              'Train Name: ${trainAvailability.trainName}',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                            Text(
-                              'General Seats Available: ${trainAvailability.generalSeatsAvailable}',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                            Text(
-                              'AC Seats Available: ${trainAvailability.acSeatsAvailable}',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                            Text(
-                              'Sleeper Seats Available: ${trainAvailability.sleeperSeatsAvailable}',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                            SizedBox(height: 10),
-                          ],
+                          ),
                         );
                       }).toList(),
-                    )
-                  else
-                    Text('No available trains for the selected route and date.'),
-                ],
+                    );
+                  }
+                },
               ),
-            ),
-          );
-        }
-      },
+              SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
     );
   }
+}
 
-  Future<List<TrainAvailability>> fetchSeatAvailabilityInfo(
-      DateTime? selectedDate,
-      String sourceStation,
-      String destinationStation,
-      ) async {
-    try {
-      print('Fetching seat availability info for:');
 
-      print('Source Station: $sourceStation');
-      print('Destination Station: $destinationStation');
+Future<List<TrainAvailability>> fetchSeatAvailabilityInfo(
+    DateTime? selectedDate,
+    String sourceStation,
+    String destinationStation,
+    List<String> trainNumbers,
+    ) async {
+  try {
+    print('Fetching seat availability info for:');
+    print('Source Station: $sourceStation');
+    print('Destination Station: $destinationStation');
 
-      CollectionReference seatsCollection = FirebaseFirestore.instance.collection('seats');
+    CollectionReference seatsCollection =
+    FirebaseFirestore.instance.collection('seats');
 
-      String formattedDate = selectedDate != null
-          ? "${selectedDate.day}-${_getMonthAbbreviation(selectedDate.month)}-${selectedDate.year}"
-          : "";
-      print('Selected Date: $formattedDate');
-      QuerySnapshot<Object?> seatsQuerySnapshot = await seatsCollection
-          .where('station name', whereIn: [sourceStation, destinationStation])
-      //.where('date', isEqualTo: formattedDate)
+    String formattedDate = selectedDate != null
+        ? "${selectedDate.day}-${_getMonthAbbreviation(selectedDate.month)}-${selectedDate.year}"
+        : "";
+    print('Selected Date: $formattedDate');
+
+    if (formattedDate != '15-jan-2024') {
+      print('No train available for the specified date: $formattedDate');
+      return [];
+    }
+
+    QuerySnapshot<Object?> seatsQuerySnapshot = await seatsCollection
+        .where('station name', whereIn: [sourceStation, destinationStation])
+        .get();
+
+    print('Raw data from seats collection:');
+    seatsQuerySnapshot.docs.forEach((seatDoc) {
+      print(seatDoc.data());
+    });
+
+    List<String> trainNumbers = [];
+    seatsQuerySnapshot.docs.forEach((seatDoc) {
+      var trainNumber = seatDoc['train number'] as String?;
+      if (trainNumber != null) {
+        trainNumbers.add(trainNumber);
+      }
+    });
+    print('Extracted train numbers: $trainNumbers');
+
+    if (trainNumbers.isNotEmpty) {
+      CollectionReference trainsCollection =
+      FirebaseFirestore.instance.collection('Trains');
+      QuerySnapshot<Object?> trainsQuerySnapshot = await trainsCollection
+          .where(FieldPath.documentId, whereIn: trainNumbers)
           .get();
 
-      print('Raw data from seats collection:');
-      seatsQuerySnapshot.docs.forEach((seatDoc) {
-        print(seatDoc.data());
+      print('Raw data from trains collection:');
+      trainsQuerySnapshot.docs.forEach((trainDoc) {
+        print(trainDoc.data());
       });
 
-      List<String> trainNumbers = [];
-      seatsQuerySnapshot.docs.forEach((seatDoc) {
-        var trainNumber = seatDoc['train number'] as String?;
-        if (trainNumber != null) {
-          trainNumbers.add(trainNumber);
-        }
+      List<TrainAvailability> trainAvailabilityList =
+      trainsQuerySnapshot.docs.map((trainDoc) {
+        Map<String, dynamic> trainData =
+        trainDoc.data() as Map<String, dynamic>;
+
+        return TrainAvailability(
+          trainNumber: trainDoc.id,
+          trainName: trainData['name'],
+          generalSeatsAvailable: 1,
+          acSeatsAvailable: 2,
+          sleeperSeatsAvailable: 3,
+        );
+      }).toList();
+
+      print('Extracted train availability information:');
+      trainAvailabilityList.forEach((trainAvailability) {
+        print(trainAvailability);
       });
-      print('Extracted train numbers: $trainNumbers');
 
-      if (trainNumbers.isNotEmpty) {
-        CollectionReference trainsCollection = FirebaseFirestore.instance.collection('Trains');
-        QuerySnapshot<Object?> trainsQuerySnapshot = await trainsCollection
-            .where(FieldPath.documentId, whereIn: trainNumbers)
-            .get();
-
-        print('Raw data from trains collection:');
-        trainsQuerySnapshot.docs.forEach((trainDoc) {
-          print(trainDoc.data());
-        });
-
-        List<TrainAvailability> trainAvailabilityList = trainsQuerySnapshot.docs.map((trainDoc) {
-          Map<String, dynamic> trainData = trainDoc.data() as Map<String, dynamic>;
-
-          return TrainAvailability(
-            trainNumber: trainDoc.id,
-            trainName: trainData['name'],
-            generalSeatsAvailable: 1,
-            acSeatsAvailable: 2,
-            sleeperSeatsAvailable: 3,
-          );
-        }).toList();
-
-        print('Extracted train availability information:');
-        trainAvailabilityList.forEach((trainAvailability) {
-          print(trainAvailability);
-        });
-
-        return trainAvailabilityList;
-      } else {
-        print(
-            'No matching seats found for date: $formattedDate, source: $sourceStation, destination: $destinationStation');
-        return [];
-      }
-    } catch (e) {
-      print('Error fetching seat availability info: $e');
-      throw 'Error fetching seat availability info';
+      return trainAvailabilityList;
+    } else {
+      print(
+          'No matching seats found for date: $formattedDate, source: $sourceStation, destination: $destinationStation');
+      return [];
     }
+  } catch (e) {
+    print('Error fetching seat availability info: $e');
+    throw 'Error fetching seat availability info';
   }
 }
 
