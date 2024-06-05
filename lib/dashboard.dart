@@ -4,7 +4,8 @@ import 'TrainAvailabilityPage.dart';
 import 'FAQsPage.dart';
 import 'AboutUsPage.dart';
 import 'FeedbackPage.dart';
-
+import 'ewalletPage.dart';
+import 'reservationPage.dart';
 class DashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -52,7 +53,17 @@ class DashboardPage extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildDashboardSection(context, 'Reservation', 'ReservationPage', Colors.orange),
+                  SizedBox(width: 20),
+                  _buildDashboardSection(context, 'e-Wallet', 'ewalletPage', Colors.purple),
+                ],
+              ),
+              SizedBox(height: 20),
               _buildFeedbackSection(context, 'Feedback', 'FeedbackPage', Colors.red),
+
             ],
           ),
         ),
@@ -210,8 +221,12 @@ class DashboardPage extends StatelessWidget {
         return AboutUsPage();
       case 'FeedbackPage':
         return FeedbackPage();
+      case 'ReservationPage':
+        return ReservationPage();
+      case 'ewalletPage':
+        return EwalletPage();
       default:
-        return SeatAvailabilityPage();
+        return DashboardPage();
     }
   }
 }

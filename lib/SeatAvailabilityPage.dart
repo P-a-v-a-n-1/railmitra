@@ -381,7 +381,7 @@ Future<List<TrainAvailability>> fetchSeatAvailabilityInfo(
         : "";
     print('Selected Date: $formattedDate');
 
-    if (formattedDate != '15-may-2024') {
+    if (formattedDate != '15-jul-2024') {
       print('No train available for the specified date: $formattedDate');
       return [];
     }
