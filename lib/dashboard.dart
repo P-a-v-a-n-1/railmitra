@@ -6,6 +6,8 @@ import 'AboutUsPage.dart';
 import 'FeedbackPage.dart';
 import 'ewalletPage.dart';
 import 'reservationPage.dart';
+import 'CommunityChatPage.dart'; // Import CommunityChatPage
+
 class DashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -30,42 +32,47 @@ class DashboardPage extends StatelessWidget {
         ),
         automaticallyImplyLeading: false,
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildDashboardSection(context, 'Train Availability by Source and Destination', 'SeatAvailabilityPage', Colors.blue),
-                  SizedBox(width: 20),
-                  _buildDashboardSection(context, 'Seat Availability by Train Number', 'TrainAvailabilityPage', Colors.green),
-                ],
-              ),
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildDashboardSection(context, 'FAQs', 'FAQsPage', Colors.orange),
-                  SizedBox(width: 20),
-                  _buildDashboardSection(context, 'About Us', 'AboutUsPage', Colors.purple),
-                ],
-              ),
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildDashboardSection(context, 'Reservation', 'ReservationPage', Colors.orange),
-                  SizedBox(width: 20),
-                  _buildDashboardSection(context, 'e-Wallet', 'ewalletPage', Colors.purple),
-                ],
-              ),
-              SizedBox(height: 20),
-              _buildFeedbackSection(context, 'Feedback', 'FeedbackPage', Colors.red),
-
-            ],
-          ),
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildDashboardSection(context, 'Train Availability by Source and Destination', 'SeatAvailabilityPage', Colors.blue),
+                SizedBox(width: 20),
+                _buildDashboardSection(context, 'Seat Availability by Train Number', 'TrainAvailabilityPage', Colors.green),
+              ],
+            ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildDashboardSection(context, 'FAQs', 'FAQsPage', Colors.orange),
+                SizedBox(width: 20),
+                _buildDashboardSection(context, 'About Us', 'AboutUsPage', Colors.purple),
+              ],
+            ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildDashboardSection(context, 'Reservation', 'ReservationPage', Colors.orange),
+                SizedBox(width: 20),
+                _buildDashboardSection(context, 'e-Wallet', 'ewalletPage', Colors.purple),
+              ],
+            ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildDashboardSection(context, 'Community Chat', 'CommunityChatPage', Colors.red),
+                SizedBox(width: 20),
+                _buildFeedbackSection(context, 'Feedback', 'FeedbackPage', Colors.red),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -179,8 +186,8 @@ class DashboardPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
         ),
         child: Container(
-          width: double.infinity,
-          height: 160,
+          width: 160,
+          height: 160, // Adjusted height
           padding: EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
@@ -225,6 +232,8 @@ class DashboardPage extends StatelessWidget {
         return ReservationPage();
       case 'ewalletPage':
         return EwalletPage();
+      case 'CommunityChatPage':
+        return CommunityChatPage();
       default:
         return DashboardPage();
     }
